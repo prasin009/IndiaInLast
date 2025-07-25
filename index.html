@@ -7,6 +7,7 @@
   <h1>Welcome to Indiainlast Color Game!</h1>
   <p>This is a test web version. Real game works in Python.</p>
 
+  <!-- Points Display -->
   <div id="pointsDisplay" style="font-weight: bold; font-size: 18px; margin-bottom: 10px;">
     Points: <span id="points">100</span>
   </div>
@@ -26,9 +27,6 @@
   <button onclick="playGame()">Play</button>
   <p id="playerResult"></p>
 
-  <h3>Last 5 Results:</h3>
-  <ul id="matchHistory"></ul>
-
   <!-- Admin Panel -->
   <h2>Admin Panel</h2>
   <label for="adminColor">Set Result Color:</label>
@@ -40,6 +38,14 @@
   <button onclick="setResult()">Set Result</button>
   <p id="adminStatus"></p>
 
+  <!-- Reset Button -->
+  <button onclick="resetGame()">Reset Game</button>
+
+  <!-- History Panel -->
+  <h2>Game History</h2>
+  <ul id="historyList"></ul>
+
+  <!-- Script Section -->
   <script>
     let points = 100;
     let currentResult = "red";
@@ -55,20 +61,6 @@
       document.getElementById("adminStatus").innerText = "Result set to: " + color;
     }
 
-    function updateHistory() {
-      history.unshift(currentResult);
-      if (history.length > 5) history.pop();
-
-      const list = document.getElementById("matchHistory");
-      list.innerHTML = "";
-      history.forEach((res, i) => {
-        const li = document.createElement("li");
-        li.innerText = res;
-        li.style.color = res;
-        list.appendChild(li);
-      });
-    }
-
     function playGame() {
       const playerColor = document.getElementById("playerColor").value;
       const bet = parseInt(document.getElementById("betAmount").value);
@@ -78,19 +70,53 @@
         return;
       }
 
+      let outcome = "";
       if (playerColor === currentResult) {
         points += bet;
+        outcome = "WON";
         document.getElementById("playerResult").innerText = "You WON! +" + bet + " points.";
       } else {
         points -= bet;
+        outcome = "LOST";
         document.getElementById("playerResult").innerText = "You LOST! -" + bet + " points.";
       }
+
+      // Add to history
+      history.unshift({
+        color: playerColor,
+        bet: bet,
+        result: currentResult,
+        outcome: outcome,
+        remaining: points
+      });
+      if (history.length > 10) history.pop(); // limit to 10 entries
 
       updatePointsDisplay();
       updateHistory();
     }
 
+    function updateHistory() {
+      const historyList = document.getElementById("historyList");
+      historyList.innerHTML = "";
+      history.forEach(entry => {
+        const li = document.createElement("li");
+        li.innerText = `Chose ${entry.color}, Bet: ${entry.bet}, Result: ${entry.result}, ${entry.outcome}, Points Left: ${entry.remaining}`;
+        historyList.appendChild(li);
+      });
+    }
+
+    function resetGame() {
+      points = 100;
+      currentResult = "red";
+      history = [];
+      document.getElementById("playerResult").innerText = "";
+      document.getElementById("adminStatus").innerText = "Game reset.";
+      updatePointsDisplay();
+      updateHistory();
+    }
+
     updatePointsDisplay();
+    updateHistory();
   </script>
 </body>
 </html>
