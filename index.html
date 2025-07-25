@@ -2,54 +2,75 @@
 <html>
 <head>
   <title>Indiainlast Color Game</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    .section { margin-bottom: 30px; }
+    table, th, td { border: 1px solid black; border-collapse: collapse; padding: 6px; }
+  </style>
 </head>
 <body>
-  <h1>Welcome to Indiainlast Color Game!</h1>
-  <p>This is a test web version. Real game works in Python.</p>
+  <h1>🎮 Indiainlast Color Game</h1>
+  <p>This is the full web version of the game!</p>
 
   <!-- Points Display -->
-  <div id="pointsDisplay" style="font-weight: bold; font-size: 18px; margin-bottom: 10px;">
-    Points: <span id="points">100</span>
+  <div class="section" id="pointsDisplay" style="font-weight: bold; font-size: 18px;">
+    Points: <span id="points">0</span>
   </div>
 
   <!-- Player Panel -->
-  <h2>Player Panel</h2>
-  <label for="playerColor">Choose Color:</label>
-  <select id="playerColor">
-    <option value="red">Red</option>
-    <option value="green">Green</option>
-    <option value="violet">Violet</option>
-  </select>
-  <br><br>
-  <label for="betAmount">Enter Bet Amount:</label>
-  <input type="number" id="betAmount" value="10" min="1">
-  <br><br>
-  <button onclick="playGame()">Play</button>
-  <p id="playerResult"></p>
+  <div class="section">
+    <h2>Player Panel</h2>
+    <label for="playerColor">Choose Color:</label>
+    <select id="playerColor">
+      <option value="red">Red</option>
+      <option value="green">Green</option>
+      <option value="violet">Violet</option>
+    </select><br><br>
+
+    <label for="betAmount">Enter Bet Amount:</label>
+    <input type="number" id="betAmount" value="10" min="1"><br><br>
+
+    <button onclick="playGame()">Play</button>
+    <p id="playerResult"></p>
+  </div>
 
   <!-- Admin Panel -->
-  <h2>Admin Panel</h2>
-  <label for="adminColor">Set Result Color:</label>
-  <select id="adminColor">
-    <option value="red">Red</option>
-    <option value="green">Green</option>
-    <option value="violet">Violet</option>
-  </select>
-  <button onclick="setResult()">Set Result</button>
-  <p id="adminStatus"></p>
-
-  <!-- Reset Button -->
-  <button onclick="resetGame()">Reset Game</button>
+  <div class="section">
+    <h2>Admin Panel</h2>
+    <label for="adminColor">Set Result Color:</label>
+    <select id="adminColor">
+      <option value="red">Red</option>
+      <option value="green">Green</option>
+      <option value="violet">Violet</option>
+    </select>
+    <button onclick="setResult()">Set Result</button>
+    <p id="adminStatus"></p>
+  </div>
 
   <!-- History Panel -->
-  <h2>Game History</h2>
-  <ul id="historyList"></ul>
+  <div class="section">
+    <h2>Game History</h2>
+    <table id="historyTable">
+      <tr>
+        <th>#</th>
+        <th>Your Color</th>
+        <th>Result</th>
+        <th>Bet</th>
+        <th>Status</th>
+      </tr>
+    </table>
+  </div>
 
-  <!-- Script Section -->
+  <!-- Reset Button -->
+  <div class="section">
+    <button onclick="resetGame()" style="background: red; color: white;">Reset Game</button>
+  </div>
+
+  <!-- Script -->
   <script>
-    let points = 100;
+    let points = parseInt(localStorage.getItem("points")) || 100;
     let currentResult = "red";
-    let history = [];
+    let history = JSON.parse(localStorage.getItem("history")) || [];
 
     function updatePointsDisplay() {
       document.getElementById("points").innerText = points;
@@ -70,53 +91,61 @@
         return;
       }
 
-      let outcome = "";
+      let status = "";
       if (playerColor === currentResult) {
         points += bet;
-        outcome = "WON";
+        status = "WIN";
         document.getElementById("playerResult").innerText = "You WON! +" + bet + " points.";
       } else {
         points -= bet;
-        outcome = "LOST";
+        status = "LOSE";
         document.getElementById("playerResult").innerText = "You LOST! -" + bet + " points.";
       }
 
-      // Add to history
+      // Update History
       history.unshift({
-        color: playerColor,
+        yourColor: playerColor,
+        resultColor: currentResult,
         bet: bet,
-        result: currentResult,
-        outcome: outcome,
-        remaining: points
+        status: status
       });
-      if (history.length > 10) history.pop(); // limit to 10 entries
+      if (history.length > 10) history.pop();
+
+      // Save
+      localStorage.setItem("points", points);
+      localStorage.setItem("history", JSON.stringify(history));
 
       updatePointsDisplay();
-      updateHistory();
+      showHistory();
     }
 
-    function updateHistory() {
-      const historyList = document.getElementById("historyList");
-      historyList.innerHTML = "";
-      history.forEach(entry => {
-        const li = document.createElement("li");
-        li.innerText = `Chose ${entry.color}, Bet: ${entry.bet}, Result: ${entry.result}, ${entry.outcome}, Points Left: ${entry.remaining}`;
-        historyList.appendChild(li);
+    function showHistory() {
+      const table = document.getElementById("historyTable");
+      table.innerHTML = `<tr><th>#</th><th>Your Color</th><th>Result</th><th>Bet</th><th>Status</th></tr>`;
+      history.forEach((item, index) => {
+        const row = table.insertRow(-1);
+        row.innerHTML = `<td>${index + 1}</td>
+                         <td>${item.yourColor}</td>
+                         <td>${item.resultColor}</td>
+                         <td>${item.bet}</td>
+                         <td>${item.status}</td>`;
       });
     }
 
     function resetGame() {
       points = 100;
-      currentResult = "red";
       history = [];
-      document.getElementById("playerResult").innerText = "";
-      document.getElementById("adminStatus").innerText = "Game reset.";
+      localStorage.removeItem("points");
+      localStorage.removeItem("history");
       updatePointsDisplay();
-      updateHistory();
+      showHistory();
+      document.getElementById("playerResult").innerText = "Game reset!";
+      document.getElementById("adminStatus").innerText = "";
     }
 
+    // Initial display
     updatePointsDisplay();
-    updateHistory();
+    showHistory();
   </script>
 </body>
 </html>
