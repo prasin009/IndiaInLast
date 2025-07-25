@@ -26,6 +26,9 @@
   <button onclick="playGame()">Play</button>
   <p id="playerResult"></p>
 
+  <h3>Last 5 Results:</h3>
+  <ul id="matchHistory"></ul>
+
   <!-- Admin Panel -->
   <h2>Admin Panel</h2>
   <label for="adminColor">Set Result Color:</label>
@@ -40,6 +43,7 @@
   <script>
     let points = 100;
     let currentResult = "red";
+    let history = [];
 
     function updatePointsDisplay() {
       document.getElementById("points").innerText = points;
@@ -49,6 +53,20 @@
       const color = document.getElementById("adminColor").value;
       currentResult = color;
       document.getElementById("adminStatus").innerText = "Result set to: " + color;
+    }
+
+    function updateHistory() {
+      history.unshift(currentResult);
+      if (history.length > 5) history.pop();
+
+      const list = document.getElementById("matchHistory");
+      list.innerHTML = "";
+      history.forEach((res, i) => {
+        const li = document.createElement("li");
+        li.innerText = res;
+        li.style.color = res;
+        list.appendChild(li);
+      });
     }
 
     function playGame() {
@@ -69,6 +87,7 @@
       }
 
       updatePointsDisplay();
+      updateHistory();
     }
 
     updatePointsDisplay();
