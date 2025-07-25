@@ -6,5 +6,72 @@
 <body>
   <h1>Welcome to Indiainlast Color Game!</h1>
   <p>This is a test web version. Real game works in Python.</p>
+
+  <div id="pointsDisplay" style="font-weight: bold; font-size: 18px; margin-bottom: 10px;">
+    Points: <span id="points">100</span>
+  </div>
+
+  <!-- Player Panel -->
+  <h2>Player Panel</h2>
+  <label for="playerColor">Choose Color:</label>
+  <select id="playerColor">
+    <option value="red">Red</option>
+    <option value="green">Green</option>
+    <option value="violet">Violet</option>
+  </select>
+  <br><br>
+  <label for="betAmount">Enter Bet Amount:</label>
+  <input type="number" id="betAmount" value="10" min="1">
+  <br><br>
+  <button onclick="playGame()">Play</button>
+  <p id="playerResult"></p>
+
+  <!-- Admin Panel -->
+  <h2>Admin Panel</h2>
+  <label for="adminColor">Set Result Color:</label>
+  <select id="adminColor">
+    <option value="red">Red</option>
+    <option value="green">Green</option>
+    <option value="violet">Violet</option>
+  </select>
+  <button onclick="setResult()">Set Result</button>
+  <p id="adminStatus"></p>
+
+  <script>
+    let points = 100;
+    let currentResult = "red";
+
+    function updatePointsDisplay() {
+      document.getElementById("points").innerText = points;
+    }
+
+    function setResult() {
+      const color = document.getElementById("adminColor").value;
+      currentResult = color;
+      document.getElementById("adminStatus").innerText = "Result set to: " + color;
+    }
+
+    function playGame() {
+      const playerColor = document.getElementById("playerColor").value;
+      const bet = parseInt(document.getElementById("betAmount").value);
+
+      if (isNaN(bet) || bet <= 0 || bet > points) {
+        document.getElementById("playerResult").innerText = "Invalid bet amount!";
+        return;
+      }
+
+      if (playerColor === currentResult) {
+        points += bet;
+        document.getElementById("playerResult").innerText = "You WON! +" + bet + " points.";
+      } else {
+        points -= bet;
+        document.getElementById("playerResult").innerText = "You LOST! -" + bet + " points.";
+      }
+
+      updatePointsDisplay();
+    }
+
+    updatePointsDisplay();
+  </script>
 </body>
 </html>
